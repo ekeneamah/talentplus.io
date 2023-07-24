@@ -1,0 +1,62 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shopping-cart
+spec:
+  replicas: {{ .Values.microservices.shoppingCart.replicas }}
+  selector:
+    matchLabels:
+      app: shopping-cart
+  template:
+    metadata:
+      labels:
+        app: shopping-cart
+    spec:
+      containers:
+        - name: shopping-cart
+          image: shopping-cart-image:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: MONGODB_URI
+              value: {{ .Values.mongodb.connectionString }}
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          volumeMounts:
+            - name: shopping-cart-logs
+              mountPath: /var/log/shopping-cart
+      volumes:
+        - name: shopping-cart-logs
+          emptyDir: {}
+      # Add other pod configurations as needed
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: shopping-cart
+spec:
+  selector:
+    app: shopping-cart
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000

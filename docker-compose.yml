@@ -1,0 +1,205 @@
+version: "3"
+services:
+  user-authentication:
+    build:
+      context: ./auth-service
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - MONGODB_URI=mongodb://mongodb-user-authentication:27017/user-authentication-db
+      - RABBITMQ_URI=amqp://rabbitmq:rabbitmqpassword@rabbitmq:5672
+    depends_on:
+      - mongodb-user-authentication
+      - rabbitmq
+    networks:
+      - my_network
+
+  product-catalog:
+    build:
+      context: ./product-catlog-service
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+    environment:
+      - MONGODB_URI=mongodb://mongodb-product-catalog:27017/product-catalog-db
+      - RABBITMQ_URI=amqp://rabbitmq:rabbitmqpassword@rabbitmq:5672
+    depends_on:
+      - mongodb-product-catalog
+      - rabbitmq
+    networks:
+      - my_network
+
+  cart-service:
+    build:
+      context: ./cart-service
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3000"
+    environment:
+      - MONGODB_URI=mongodb://mongodb-shopping-cart:27017/shopping-cart-db
+      - RABBITMQ_URI=amqp://rabbitmq:rabbitmqpassword@rabbitmq:5672
+      - PORT=3000
+    depends_on:
+      - mongodb-shopping-cart
+      - rabbitmq
+    networks:
+      - my_network
+
+  order-processing:
+    build:
+      context: ./order-service
+      dockerfile: Dockerfile
+    ports:
+      - "3003:3000"
+    environment:
+      - MONGODB_URI=mongodb://mongodb-order-processing:27017/order-processing-db
+      - RABBITMQ_URI=amqp://rabbitmq:rabbitmqpassword@rabbitmq:5672
+    depends_on:
+      - mongodb-order-processing
+      - rabbitmq
+    networks:
+      - my_network
+
+  payment-gateway:
+    build:
+      context: ./paymentgateway-service
+      dockerfile: Dockerfile
+    ports:
+      - "3004:3000"
+    environment:
+      - MONGODB_URI=mongodb://mongodb-payment-gateway:27017/payment-gateway-db
+      - RABBITMQ_URI=amqp://rabbitmq:rabbitmqpassword@rabbitmq:5672
+    depends_on:
+      - mongodb-payment-gateway
+      - rabbitmq
+    networks:
+      - my_network
+
+  api-gateway:
+    build:
+      context: ./api-gateway
+      dockerfile: Dockerfile
+    ports:
+      - "8000:3000"
+    environment:
+      - MONGODB_URI=3000
+    networks:
+      - my_network
+
+  mongodb-user-authentication:
+    image: mongo:latest
+    container_name: mongodb-user-authentication
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_user_authentication_data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+    networks:
+      - my_network
+
+  mongodb-product-catalog:
+    image: mongo:latest
+    container_name: mongodb-product-catalog
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_product_catalog_data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+    networks:
+      - my_network
+
+  mongodb-shopping-cart:
+    image: mongo:latest
+    container_name: mongodb-shopping-cart
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_shopping_cart_data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+    networks:
+      - my_network
+
+  mongodb-order-processing:
+    image: mongo:latest
+    container_name: mongodb-order-processing
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_order_processing_data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+    networks:
+      - my_network
+
+  mongodb-payment-gateway:
+    image: mongo:latest
+    container_name: mongodb-payment-gateway
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_payment_gateway_data:/data/db
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=admin
+      - MONGO_INITDB_ROOT_PASSWORD=admin
+    networks:
+      - my_network
+
+  rabbitmq:
+    image: rabbitmq:latest
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+    environment:
+      - RABBITMQ_DEFAULT_USER=rabbitmq
+      - RABBITMQ_DEFAULT_PASS=rabbitmqpassword
+    networks:
+      - my_network
+   # Prometheus Configuration
+  prometheus:
+    image: prom/prometheus
+    ports:
+      - '9090:9090'
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+
+  # Grafana Configuration
+  grafana:
+    image: grafana/grafana
+    ports:
+      - '3000:3000'
+    depends_on:
+      - prometheus
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_ANONYMOUS_ORG_NAME=MainOrg
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
+      - GF_AUTH_DISABLE_SIGNOUT_MENU=true
+    volumes:
+      - ./grafana-provisioning:/etc/grafana/provisioning
+      - grafana-data:/var/lib/grafana
+
+volumes:
+  mongodb_user_authentication_data:
+    driver: local
+  mongodb_product_catalog_data:
+    driver: local
+  mongodb_shopping_cart_data:
+    driver: local
+  mongodb_order_processing_data:
+    driver: local
+  mongodb_payment_gateway_data:
+    driver: local
+  grafana-data:
+
+networks:
+  my_network:
+    driver: bridge

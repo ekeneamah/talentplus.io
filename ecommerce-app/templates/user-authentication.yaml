@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-authentication
+spec:
+  replicas: {{ .Values.microservices.userAuthentication.replicas }}
+  selector:
+    matchLabels:
+      app: user-authentication
+  template:
+    metadata:
+      labels:
+        app: user-authentication
+    spec:
+      containers:
+        - name: user-authentication
+          image: user-auth-image:latest
+          ports:
+            - containerPort: 3000
+          env:
+            - name: MONGODB_URI
+              value: {{ .Values.mongodb.connectionString }}
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 15
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 3000
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          volumeMounts:
+            - name: user-authentication-logs
+              mountPath: /var/log/user-authentication
+      volumes:
+        - name: user-authentication-logs
+          emptyDir: {}
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-authentication
+spec:
+  selector:
+    app: user-authentication
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000

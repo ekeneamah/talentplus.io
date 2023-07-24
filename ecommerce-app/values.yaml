@@ -1,0 +1,31 @@
+mongodb:
+  replicas: 1
+  rootUsername: admin
+
+rabbitmq:
+  replicas: 1
+  username: guest
+
+prometheus:
+  replicas: 1
+
+grafana:
+  replicas: 1
+  adminUser: admin
+
+microservices:
+  apiGateway:
+    replicas: 1
+    mongodbConnectionString: mongodb://mongodb-api-gateway:27017 # connection string for API Gateway
+  productCatalog:
+    replicas: 1
+    mongodbConnectionString: mongodb://mongodb-product-catalog:27017 # connection string for Product Catalog
+  shoppingCart:
+    replicas: 1
+    mongodbConnectionString: mongodb://mongodb-shopping-cart:27017 # connection string for Shopping Cart
+  orderProcessing:
+    replicas: 1
+    mongodbConnectionString: mongodb://mongodb-order-processing:27017 # connection string for Order Processing
+  paymentGateway:
+    replicas: 1
+    mongodbConnectionString: mongodb://mongodb-payment-gateway:27017 # connection string for Payment Gateway

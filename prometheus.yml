@@ -1,0 +1,29 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: 'user-authentication'
+    static_configs:
+      - targets: ['user-authentication:3000']
+
+  - job_name: 'product-catalog'
+    static_configs:
+      - targets: ['product-catalog:3001']
+
+  - job_name: 'cart-service'
+    static_configs:
+      - targets: ['cart-service:3002']
+
+  - job_name: 'order-processing'
+    static_configs:
+      - targets: ['product-catalog:3003']
+
+  - job_name: 'payment-gateway'
+    static_configs:
+      - targets: ['product-catalog:3004']
+  
+
+
+  - job_name: 'api-gateway'
+    static_configs:
+    - targets: [api-gateway:80']

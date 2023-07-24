@@ -1,0 +1,24 @@
+{
+  "name": "product-catlog-service",
+  "version": "1.0.0",
+  "description": "Product catlogue Service",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "author": "Ekene Amah",
+  "license": "ISC",
+  "dependencies": {
+    "dotenv": "^16.3.1",
+    "express": "^4.17.1",
+    "mongodb": "^5.7.0",
+    "mongoose": "^6.0.0",
+    "prom-client": "^14.2.0",
+    "winston": "^3.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.12"
+  }
+}
