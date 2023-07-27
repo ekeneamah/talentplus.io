@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: order-processing
-          image: your-order-processing-image:latest
+          image: talentplusio-order-processing:latest
           ports:
             - containerPort: 3000
           env:

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: product-catalog
-          image: your-product-catalog-image:latest
+          image: talentplusio-product-catalog:latest
           ports:
             - containerPort: 3000
           env:

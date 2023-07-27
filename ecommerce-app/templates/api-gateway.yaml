@@ -16,7 +16,7 @@ spec:
         - name: api-gateway
           image: api-gateway-image:latest
           ports:
-            - containerPort: 800000
+            - containerPort: 80
           env:
             - name: USER_AUTH_URL
               value: http://user-authentication:3001
@@ -38,13 +38,13 @@ spec:
           livenessProbe:
             httpGet:
               path: /health
-              port: 8000
+              port: 80
             initialDelaySeconds: 15
             periodSeconds: 10
           readinessProbe:
             httpGet:
               path: /health
-              port: 8000
+              port: 80
             initialDelaySeconds: 10
             periodSeconds: 5
           volumeMounts:
@@ -65,8 +65,8 @@ spec:
     app: api-gateway
   ports:
     - name: http
-      port: 8000
-      targetPort: 8000
+      port: 80
+      targetPort: 80
 
 ---
 
@@ -87,5 +87,5 @@ spec:
               service:
                 name: api-gateway
                 port:
-                  number: 8000
+                  number: 80
 

@@ -1,0 +1,76 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Build and push Docker images
+        run: |
+          docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+          docker-compose -f docker-compose.yaml build
+          docker-compose -f docker-compose.yaml push
+        env:
+          DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+          DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+
+  helm-package:
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Helm
+        run: |
+          curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+          chmod 700 get_helm.sh
+          ./get_helm.sh
+        env:
+          KUBECONFIG: ${{ secrets.KUBECONFIG }}
+
+      - name: Package Helm chart
+        run: |
+          helm package ecommerce-app -d ./helm-charts
+        env:
+          KUBECONFIG: ${{ secrets.KUBECONFIG }}
+
+  deploy-helm:
+    needs: helm-package
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Setup Kubernetes
+        run: |
+          echo $KUBECONFIG | base64 -d > kubeconfig
+          sudo mv kubeconfig /etc/kubernetes/config
+          kubectl config use-context your-kubernetes-context
+
+      - name: Install Helm
+        run: |
+          curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+          chmod 700 get_helm.sh
+          ./get_helm.sh
+
+      - name: Add Helm repository
+        run: |
+          helm repo add your-helm-repo-name https://your-helm-repo-url
+
+      - name: Deploy Helm chart
+        run: |
+          helm upgrade --install my-ecommerce-app your-helm-repo-name/ecommerce-app \
+            --namespace your-kubernetes-namespace \
+            --create-namespace \
+            --set image.repository=your-dockerhub-username \
+            --set image.tag=latest
+        env:
+          KUBECONFIG: ${{ secrets.KUBECONFIG }}

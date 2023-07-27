@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: payment-gateway
-          image: your-payment-gateway-image:latest
+          image: talentplusio-payment-gateway:latest
           ports:
             - containerPort: 3000
           env:

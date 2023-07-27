@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: user-authentication
-          image: user-auth-image:latest
+          image: talentplusio-user-authentication:latest
           ports:
             - containerPort: 3000
           env:

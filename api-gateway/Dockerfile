@@ -14,7 +14,7 @@ RUN npm install
 COPY . .
 
 # Expose the port the API Gateway will run on
-EXPOSE 8000
+EXPOSE 80
 
 # Start the API Gateway
 CMD ["npm", "start"]

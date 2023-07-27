@@ -4,7 +4,7 @@ import apiGateway from './api-gateway';
 import microservices from './microservices';
 
 const app = express();
-const port = 8000;
+const port = 80;
 
 // Set up the API Gateway
 apiGateway(app);
